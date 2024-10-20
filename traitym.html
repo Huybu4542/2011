@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lời Chúc Ngày Phụ Nữ Việt Nam</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-image: url('background.gif');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #ff4081;
+            font-size: 2.5em;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        .emoji-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .emoji {
+            font-size: 50px;
+            margin: 0 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .emoji:hover {
+            transform: scale(1.2);
+        }
+
+        .message-container, .question-container {
+            margin-top: 20px;
+            width: 100%;
+            display: none; /* Ẩn phần lời chúc và câu hỏi cho đến khi cần */
+        }
+
+        .message, .question {
+            font-size: 18px;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .answer {
+            display: block;
+            margin: 10px 0;
+            padding: 5px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .correct {
+            background-color: #d4edda;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff4081, 0 0 20px #ff4081;
+            }
+            to {
+                text-shadow: 0 0 20px #ff4081, 0 0 30px #ff4081;
+            }
+        }
+
+        .playMusicButton {
+            background-color: #ff4081; /* Màu nền */
+            color: white; /* Màu chữ */
+            border: none; /* Không có đường viền */
+            border-radius: 25px; /* Bo tròn góc */
+            padding: 10px 20px; /* Khoảng cách bên trong */
+            font-size: 1.2em; /* Kích thước chữ */
+            cursor: pointer; /* Thay đổi con trỏ khi hover */
+            transition: background-color 0.3s, transform 0.2s; /* Hiệu ứng chuyển đổi */
+            margin-top: 20px; /* Khoảng cách phía trên */
+        }
+
+        .playMusicButton:hover {
+            background-color: #e91e63; /* Màu nền khi hover */
+            transform: scale(1.05); /* Phóng to một chút khi hover */
+        }
+
+        canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pinkboard"></canvas>
+    <div class="container">
+        <h1>Chúc Mừng Ngày Phụ Nữ Việt Nam</h1>
+
+        <!-- Các biểu tượng cảm xúc cho mini game -->
+        <div class="emoji-container">
+            <div class="emoji" onclick="selectEmoji('happy')">😊</div>
+            <div class="emoji" onclick="selectEmoji('love')">❤️</div>
+            <div class="emoji" onclick="selectEmoji('celebrate')">🎉</div>
+        </div>
+
+        <!-- Nút Phát Nhạc -->
+        <button class="playMusicButton" onclick="playMusic()">Phát Nhạc</button>
+
+        <!-- Danh sách lời chúc -->
+        <div class="message-container" id="messageContainer"></div>
+
+        <!-- Danh sách câu hỏi -->
+        <div class="question-container" id="questionContainer"></div>
+
+        <!-- Nhạc sẽ tự phát khi vào trang -->
+        <audio id="backgroundMusic" loop>
+            <source src="music.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script>
+        // Lấy các phần tử HTML
+        const messageContainer = document.getElementById('messageContainer');
+        const questionContainer = document.getElementById('questionContainer');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+
+        // Danh sách các câu chúc tương ứng với các emoji
+        const messages = {
+            happy: [
+                "Chúc các chị em luôn xinh đẹp, tự tin và thành công trong cuộc sống!",
+                "Chúc các bạn nữ một ngày 20/10 tràn đầy nụ cười và niềm vui!",
+                "Mong rằng mọi ước mơ của các bạn sẽ trở thành hiện thực!",
+                "Hãy luôn mỉm cười và lan tỏa niềm vui đến mọi người xung quanh!",
+                "Chúc chị em mãi mãi giữ được sự trẻ trung và yêu đời!"
+            ],
+            love: [
+                "Chúc các chị em có một ngày 20/10 thật ngọt ngào và ý nghĩa bên những người yêu thương!",
+                "Hy vọng chị em sẽ luôn được trân trọng và yêu thương như các bạn xứng đáng!",
+                "Chúc tình yêu và hạnh phúc sẽ luôn đồng hành cùng các bạn!",
+                "Mong rằng các bạn sẽ tìm thấy những điều tốt đẹp nhất trong cuộc sống!",
+                "Hãy yêu bản thân mình nhiều hơn, bạn xứng đáng với điều đó!"
+            ],
+            celebrate: [
+                "Chúc mừng Ngày Phụ nữ Việt Nam! Các chị em hãy luôn mạnh mẽ và kiên cường!",
+                "Hãy cùng nhau tạo nên những kỷ niệm đẹp trong ngày đặc biệt này!",
+                "Chúc mọi người luôn tràn đầy sức sống và năng lượng tích cực!",
+                "Mỗi ngày đều là một lễ hội, hãy sống hết mình và vui vẻ!",
+                "Chúc các chị em luôn tỏa sáng như những ngôi sao trong cuộc sống!"
+            ]
+        };
+
+        // Danh sách câu hỏi
+        const questions = [
+            {
+                question: "Ngày Phụ nữ Việt Nam được tổ chức vào ngày nào?",
+                options: ["20/10", "8/3", "1/5"],
+                answer: "20/10"
+            },
+            {
+                question: "Màu sắc nào thường được liên kết với Ngày Phụ nữ?",
+                options: ["Đỏ", "Hồng", "Xanh"],
+                answer: "Hồng"
+            },
+            {
+                question: "Ai là người phụ nữ đầu tiên trở thành Tổng thống của Việt Nam?",
+                options: ["Bà Nguyễn Thị Bình", "Bà Võ Thị Sáu", "Không ai cả"],
+                answer: "Không ai cả"
+            },
+            {
+                question: "Ngày Quốc tế Phụ nữ diễn ra vào ngày nào?",
+                options: ["20/10", "8/3", "1/6"],
+                answer: "8/3"
+            },
+            {
+                question: "Bông hoa nào thường được tặng vào Ngày Phụ nữ?",
+                options: ["Hoa hồng", "Hoa cúc", "Hoa lan"],
+                answer: "Hoa hồng"
+            },
+            {
+                question: "Ai là người phụ nữ Việt Nam đầu tiên đoạt giải Nobel?",
+                options: ["Bà Đoàn Thị Điểm", "Bà Nguyễn Thị Phương Thảo", "Không ai cả"],
+                answer: "Không ai cả"
+            },
+            {
+                question: "Phụ nữ có quyền bầu cử ở Việt Nam từ năm nào?",
+                options: ["1946", "1954", "1960"],
+                answer: "1946"
+            },
+            {
+                question: "Ngày Phụ nữ Việt Nam có ý nghĩa gì?",
+                options: ["Tôn vinh vai trò của phụ nữ", "Kỷ niệm ngày thành lập Đảng", "Ngày Quốc tế Lao động"],
+                answer: "Tôn vinh vai trò của phụ nữ"
+            }
+        ];
+
+        // Biến để theo dõi chỉ số câu hỏi hiện tại
+        let currentQuestionIndex = 0;
+        let selectedEmoji; // Biến để lưu emoji đã chọn
+
+        // Hàm để hiển thị lời chúc
+        function displayMessage(message) {
+            const messageElement = document.createElement('p');
+            messageElement.className = 'message';
+            messageElement.innerText = message;
+            messageContainer.appendChild(messageElement);
+            messageContainer.style.display = 'block';
+        }
+
+        // Hàm để hiển thị câu hỏi
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const question = questions[currentQuestionIndex];
+                const questionElement = document.createElement('p');
+                questionElement.className = 'question';
+                questionElement.innerText = question.question;
+                questionContainer.appendChild(questionElement);
+
+                // Tạo các lựa chọn cho câu hỏi
+                question.options.forEach(option => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'answer';
+                    optionElement.innerText = option;
+                    optionElement.onclick = () => checkAnswer(option);
+                    questionContainer.appendChild(optionElement);
+                });
+                questionContainer.style.display = 'block';
+            }
+        }
+
+        // Hàm kiểm tra đáp án
+        function checkAnswer(selectedOption) {
+            const question = questions[currentQuestionIndex];
+            const isCorrect = selectedOption === question.answer;
+            const answerElement = document.createElement('div');
+            answerElement.innerText = isCorrect ? 'Đúng rồi!' : 'Sai rồi!';
+            answerElement.className = isCorrect ? 'correct' : 'incorrect';
+            questionContainer.appendChild(answerElement);
+            currentQuestionIndex++;
+
+            // Hiển thị câu hỏi tiếp theo hoặc lời chúc cuối cùng
+            setTimeout(() => {
+                questionContainer.innerHTML = ''; // Xóa câu hỏi cũ
+                if (currentQuestionIndex < questions.length) {
+                    displayQuestion(); // Hiển thị câu hỏi tiếp theo
+                } else {
+                    displayFinalMessages(); // Hiển thị tất cả lời chúc cuối cùng
+                }
+            }, 1000);
+        }
+
+        // Hàm hiển thị tất cả lời chúc sau khi kết thúc các câu hỏi
+        function displayFinalMessages() {
+            questionContainer.style.display = 'none'; // Ẩn phần câu hỏi
+            const finalMessages = messages[selectedEmoji];
+            finalMessages.forEach(message => displayMessage(message)); // Hiển thị tất cả lời chúc
+        }
+
+        // Hàm chọn emoji
+        function selectEmoji(emoji) {
+            selectedEmoji = emoji; // Lưu emoji đã chọn
+            messageContainer.innerHTML = ''; // Xóa lời chúc cũ
+            questionContainer.innerHTML = ''; // Xóa câu hỏi cũ
+            currentQuestionIndex = 0; // Đặt lại chỉ số câu hỏi
+            displayQuestion(); // Hiển thị câu hỏi đầu tiên
+        }
+
+        // Hàm phát nhạc
+        function playMusic() {
+            backgroundMusic.play();
+        }
+
+        // Phát nhạc tự động khi trang được tải
+        window.onload = () => {
+            backgroundMusic.play();
+        };
+    </script>
+</body>
+</html>
